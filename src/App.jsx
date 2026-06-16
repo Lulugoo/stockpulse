@@ -228,6 +228,15 @@ function CheckIcon({ className }) {
   );
 }
 
+function SplitIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <line x1="12" y1="4" x2="12" y2="20" />
+    </svg>
+  );
+}
+
 function StarIcon({ className, filled }) {
   return (
     <svg
@@ -302,6 +311,38 @@ function MetricChip({ name, value, explanation, warning, dark }) {
   );
 }
 
+function CompareCatRow({ label, weight, a, b, dark }) {
+  const cls = (x, y) =>
+    x > y ? "text-emerald-500" : x < y ? "text-red-500" : dark ? "text-gray-200" : "text-gray-700";
+  const sides = [
+    { v: a, other: b },
+    { v: b, other: a },
+  ];
+  return (
+    <div className="py-3">
+      <p className={`text-sm font-semibold ${dark ? "text-gray-100" : "text-gray-800"}`}>
+        {label} <span className={`font-normal ${dark ? "text-gray-400" : "text-gray-500"}`}>({weight})</span>
+      </p>
+      <div className="mt-2 grid grid-cols-2 gap-4">
+        {sides.map((side, i) => (
+          <div key={i}>
+            <p className={`text-sm font-bold tabular-nums ${cls(side.v, side.other)}`}>
+              {side.v.toFixed(1)}
+              <span className="text-xs font-normal opacity-70">/10</span>
+            </p>
+            <div className={`mt-1 h-1.5 w-full rounded-full ${dark ? "bg-white/10" : "bg-black/10"}`}>
+              <div
+                className={`h-1.5 rounded-full ${scoreColor(side.v)}`}
+                style={{ width: `${Math.max(0, Math.min(100, side.v * 10))}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CategoryRow({ label, weight, score, dark, chips, data }) {
   return (
     <div className="py-3">
@@ -353,22 +394,26 @@ export default function App() {
     }
   });
   const [copied, setCopied] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [tickerB, setTickerB] = useState("");
+  const [queryB, setQueryB] = useState("");
+  const [suggestionsB, setSuggestionsB] = useState([]);
+  const [showDropdownB, setShowDropdownB] = useState(false);
   const searchRef = useRef(null);
+  const searchRefB = useRef(null);
 
   const { data, loading, error } = useStockData(ticker);
+  const { data: dataB, loading: loadingB, error: errorB } = useStockData(tickerB);
 
   // Deep link: load ?ticker=XYZ on startup.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const initial = params.get("ticker");
     if (initial) {
-      const clean = initial.trim().toUpperCase();
-      setTicker(clean);
-      setHistory([clean]);
+      setTicker(initial.trim().toUpperCase());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-
 
   // Persist favorites to localStorage whenever they change.
   useEffect(() => {
@@ -383,6 +428,27 @@ export default function App() {
       setShowDropdown(false);
       return;
     }
+  // Mock autocomplete for compare bar
+  const MOCK_SUGGESTIONS = [
+    { symbol: "AAPL", name: "Apple Inc" },
+    { symbol: "AMZN", name: "Amazon.com Inc" },
+    { symbol: "TSLA", name: "Tesla Inc" },
+    { symbol: "META", name: "Meta Platforms Inc" },
+    { symbol: "NVDA", name: "Nvidia Corporation" },
+    { symbol: "GOOGL", name: "Alphabet Inc" },
+    { symbol: "MSFT", name: "Microsoft Corporation" },
+    { symbol: "KO", name: "Coca-Cola Company" },
+    { symbol: "GME", name: "GameStop Corp" },
+    { symbol: "JPM", name: "JPMorgan Chase & Co" },
+  ];
+  const lowerB = keywords.toLowerCase();
+  const filteredB = MOCK_SUGGESTIONS.filter(
+    s => s.symbol.toLowerCase().includes(lowerB) ||
+        s.name.toLowerCase().includes(lowerB)
+  ).slice(0, 6);
+  setSuggestionsB(filteredB);
+  setShowDropdownB(filteredB.length > 0);
+  return;
 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
@@ -415,11 +481,54 @@ export default function App() {
     };
   }, [query]);
 
-  // Dismiss dropdown on outside click.
+  // Debounced SYMBOL_SEARCH autocomplete for the compare (B) search bar.
+  useEffect(() => {
+    const keywords = queryB.trim();
+    if (keywords.length < 3) {
+      setSuggestionsB([]);
+      setShowDropdownB(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(
+            keywords
+          )}&apikey=${import.meta.env.VITE_AV_API_KEY}`,
+          { signal: controller.signal }
+        );
+        const json = await res.json();
+        const matches = Array.isArray(json.bestMatches) ? json.bestMatches : [];
+        setSuggestionsB(
+          matches.slice(0, 6).map((m) => ({
+            symbol: m["1. symbol"],
+            name: m["2. name"],
+          }))
+        );
+        setShowDropdownB(true);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setSuggestionsB([]);
+        }
+      }
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [queryB]);
+
+  // Dismiss dropdowns on outside click.
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowDropdown(false);
+      }
+      if (searchRefB.current && !searchRefB.current.contains(e.target)) {
+        setShowDropdownB(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -463,10 +572,43 @@ export default function App() {
     });
   };
 
+  const loadTickerB = (symbol) => {
+    const clean = symbol.trim().toUpperCase();
+    if (!clean) return;
+    setTickerB(clean);
+    setQueryB("");
+    setSuggestionsB([]);
+    setShowDropdownB(false);
+  };
+
+  const handleSubmitB = (e) => {
+    e.preventDefault();
+    loadTickerB(queryB);
+  };
+
+  const exitCompare = () => {
+    setCompareMode(false);
+    setTickerB("");
+    setQueryB("");
+    setSuggestionsB([]);
+    setShowDropdownB(false);
+  };
+
   const score = data ? scoreStock(data) : null;
   const vStyle = score ? verdictStyles[score.verdict] : null;
   const metricChips = data ? buildMetricChips(data) : null;
   const isFavorite = data ? favorites.includes(data.symbol) : false;
+
+  const scoreB = dataB ? scoreStock(dataB) : null;
+  const vStyleB = scoreB ? verdictStyles[scoreB.verdict] : null;
+  const showCompare = compareMode && data && score && dataB && scoreB;
+  const winnerSymbol = showCompare
+    ? score.finalScore > scoreB.finalScore
+      ? data.symbol
+      : scoreB.finalScore > score.finalScore
+      ? dataB.symbol
+      : null
+    : null;
 
   const pageBg = dark ? "bg-[#2C2C2A] text-gray-100" : "bg-[#F1EFE8] text-gray-900";
   const cardBg = dark ? "bg-[#444441]" : "bg-white";
@@ -532,6 +674,54 @@ export default function App() {
             </ul>
           )}
         </div>
+
+        {/* Compare search */}
+        {compareMode && (
+          <div ref={searchRefB} className="relative mt-3">
+            <p className={`mb-1 ml-2 text-xs font-medium ${dark ? "text-gray-400" : "text-gray-500"}`}>Compare with...</p>
+            <form onSubmit={handleSubmitB}>
+              <div className="relative">
+                <SplitIcon className={`pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 ${dark ? "text-gray-400" : "text-gray-500"}`} />
+                <input
+                  type="text"
+                  value={queryB}
+                  onChange={(e) => setQueryB(e.target.value)}
+                  onFocus={() => suggestionsB.length > 0 && setShowDropdownB(true)}
+                  placeholder="Compare with another ticker or company..."
+                  className={`w-full rounded-full border ${dark ? "border-white/10" : "border-gray-300"} ${inputBg} py-3.5 pl-14 pr-5 text-base shadow-sm outline-none focus:ring-2 focus:ring-emerald-500/50`}
+                />
+              </div>
+            </form>
+
+            {showDropdownB && suggestionsB.length > 0 && (
+              <ul className={`absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border ${dark ? "border-white/10 bg-[#444441]" : "border-black/10 bg-white"} shadow-lg`}>
+                {suggestionsB.map((s) => (
+                  <li key={s.symbol}>
+                    <button
+                      type="button"
+                      onClick={() => loadTickerB(s.symbol)}
+                      className={`flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors ${dark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                    >
+                      <span className={`font-semibold ${dark ? "text-gray-100" : "text-gray-900"}`}>{s.symbol}</span>
+                      <span className={`truncate text-sm ${dark ? "text-gray-400" : "text-gray-500"}`}>{s.name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {loadingB && tickerB && !dataB && (
+              <div className="mt-3">
+                <Spinner />
+              </div>
+            )}
+            {!loadingB && errorB && (
+              <div className="mt-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-center text-sm text-red-500">
+                {errorB}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Favorites */}
         {favorites.length > 0 && (
@@ -617,8 +807,55 @@ export default function App() {
           </div>
         )}
 
+        {/* Compare view */}
+        {showCompare && (
+          <div className={`sp-card-enter relative mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
+            <button
+              type="button"
+              onClick={exitCompare}
+              aria-label="Exit compare mode"
+              className={`absolute right-4 top-4 rounded-full p-1.5 transition-colors ${
+                dark ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-black/5"
+              }`}
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div className="rounded-xl bg-emerald-500/10 px-4 py-3 text-center text-sm font-bold text-emerald-600">
+              {winnerSymbol ? `${winnerSymbol} has stronger fundamentals` : "Evenly matched fundamentals"}
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              {[
+                { d: data, s: score, st: vStyle },
+                { d: dataB, s: scoreB, st: vStyleB },
+              ].map((col, i) => (
+                <div key={i} className="text-center">
+                  <h2 className={`text-2xl font-bold leading-tight ${dark ? "text-white" : "text-gray-900"}`}>{col.d.symbol}</h2>
+                  <p className={`mt-0.5 truncate text-sm ${dark ? "text-gray-300" : "text-gray-700"}`}>{col.d.name}</p>
+                  <p className="mt-2 text-3xl font-extrabold tabular-nums">
+                    {col.s.finalScore.toFixed(1)}
+                    <span className={`text-base font-medium ${dark ? "text-gray-400" : "text-gray-500"}`}>/10</span>
+                  </p>
+                  <span className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${col.st.badge}`}>
+                    {col.s.verdict}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className={`mt-4 divide-y ${dark ? "divide-white/10" : "divide-black/5"}`}>
+              <CompareCatRow label="Value" weight="35%" a={score.valueScore} b={scoreB.valueScore} dark={dark} />
+              <CompareCatRow label="Quality" weight="40%" a={score.qualityScore} b={scoreB.qualityScore} dark={dark} />
+              <CompareCatRow label="Momentum" weight="25%" a={score.momentumScore} b={scoreB.momentumScore} dark={dark} />
+            </div>
+          </div>
+        )}
+
         {/* Result card */}
-        {!loading && !error && data && score && (
+        {!loading && !error && data && score && !showCompare && (
           <div key={data.symbol} className={`sp-card-enter mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -663,6 +900,21 @@ export default function App() {
                     {copied ? <CheckIcon className="h-5 w-5" /> : <ShareIcon className="h-5 w-5" />}
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => (compareMode ? exitCompare() : setCompareMode(true))}
+                  aria-label="Compare with another stock"
+                  aria-pressed={compareMode}
+                  className={`mt-1 rounded-full p-2 transition-colors ${
+                    compareMode
+                      ? "text-emerald-500 hover:bg-emerald-500/10"
+                      : dark
+                      ? "text-gray-400 hover:bg-white/10"
+                      : "text-gray-400 hover:bg-black/5"
+                  }`}
+                >
+                  <SplitIcon className="h-5 w-5" />
+                </button>
                 <div className="text-right">
                   <p className="text-3xl font-extrabold tabular-nums">
                     {score.finalScore.toFixed(1)}
