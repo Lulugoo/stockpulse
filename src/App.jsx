@@ -188,6 +188,35 @@ function MoonIcon({ className }) {
   );
 }
 
+function Tooltip({ text, dark, children }) {
+  return (
+    <span className="group/tip relative inline-flex">
+      {children}
+      <span
+        role="tooltip"
+        className={`pointer-events-none absolute bottom-full left-1/2 z-[100] mb-2 hidden w-max max-w-[220px] -translate-x-1/2 whitespace-normal rounded-lg border px-3 py-2 text-[12px] font-normal leading-snug shadow-lg group-hover/tip:block ${
+          dark ? "border-white/10 bg-[#3a3a38] text-gray-100" : "border-black/5 bg-white text-gray-700"
+        }`}
+      >
+        {text}
+        <span
+          className={`absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-r ${
+            dark ? "border-white/10 bg-[#3a3a38]" : "border-black/5 bg-white"
+          }`}
+        />
+      </span>
+    </span>
+  );
+}
+
+function Spinner() {
+  return (
+    <div className="flex items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500/25 border-t-emerald-500" />
+    </div>
+  );
+}
+
 function MetricChip({ name, value, explanation, warning, dark }) {
   return (
     <span
@@ -197,21 +226,21 @@ function MetricChip({ name, value, explanation, warning, dark }) {
     >
       <span className={dark ? "text-gray-400" : "text-gray-500"}>{name}</span>
       <span className="font-semibold tabular-nums">{value}</span>
-      <span
-        title={explanation}
-        className={`flex h-4 w-4 cursor-help items-center justify-center rounded-full text-[10px] font-bold ${
-          dark ? "bg-white/15 text-gray-300" : "bg-black/10 text-gray-600"
-        }`}
-      >
-        ?
-      </span>
-      {warning && (
+      <Tooltip text={explanation} dark={dark}>
         <span
-          title={warning}
-          className="flex h-4 w-4 cursor-help items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-500"
+          className={`flex h-4 w-4 cursor-help items-center justify-center rounded-full text-[10px] font-bold ${
+            dark ? "bg-white/15 text-gray-300" : "bg-black/10 text-gray-600"
+          }`}
         >
-          !
+          ?
         </span>
+      </Tooltip>
+      {warning && (
+        <Tooltip text={warning} dark={dark}>
+          <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-500">
+            !
+          </span>
+        </Tooltip>
       )}
     </span>
   );
@@ -265,42 +294,12 @@ export default function App() {
 
   // Debounced SYMBOL_SEARCH autocomplete (fires at 3+ chars).
   useEffect(() => {
-  // Mock autocomplete — remove when MOCK_MODE is off
-  if (import.meta.env.VITE_AV_API_KEY === undefined || true) {
-    const MOCK_SUGGESTIONS = [
-      { symbol: "AAPL", name: "Apple Inc" },
-      { symbol: "AMZN", name: "Amazon.com Inc" },
-      { symbol: "TSLA", name: "Tesla Inc" },
-      { symbol: "META", name: "Meta Platforms Inc" },
-      { symbol: "NVDA", name: "Nvidia Corporation" },
-      { symbol: "GOOGL", name: "Alphabet Inc" },
-      { symbol: "MSFT", name: "Microsoft Corporation" },
-      { symbol: "KO", name: "Coca-Cola Company" },
-      { symbol: "GME", name: "GameStop Corp" },
-      { symbol: "JPM", name: "JPMorgan Chase & Co" },
-    ];
-    const keywords = query.trim().toLowerCase();
+    const keywords = query.trim();
     if (keywords.length < 3) {
       setSuggestions([]);
       setShowDropdown(false);
       return;
     }
-    const filtered = MOCK_SUGGESTIONS.filter(
-      s => s.symbol.toLowerCase().includes(keywords) ||
-           s.name.toLowerCase().includes(keywords)
-    ).slice(0, 6);
-    setSuggestions(filtered);
-    setShowDropdown(filtered.length > 0);
-    return;
-  }
-
-  // Real API search below (active when MOCK_MODE is off)
-  const keywords = query.trim();
-  if (keywords.length < 3) {
-        setSuggestions([]);
-        setShowDropdown(false);
-        return;
-      }
 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
@@ -373,6 +372,13 @@ export default function App() {
 
   return (
     <div className={`min-h-screen w-full ${pageBg} transition-colors`}>
+      <style>{`
+        @keyframes spCardEnter {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .sp-card-enter { animation: spCardEnter 300ms ease-out; }
+      `}</style>
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* Header */}
         <header className="flex items-center justify-between">
@@ -402,7 +408,7 @@ export default function App() {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
                 placeholder="Search by ticker or company name..."
-                className={`w-full rounded-full border ${dark ? "border-white/10" : "border-black/10"} ${inputBg} py-3.5 pl-14 pr-5 text-base shadow-sm outline-none focus:ring-2 focus:ring-emerald-500/50`}
+                className={`w-full rounded-full border ${dark ? "border-white/10" : "border-gray-300"} ${inputBg} py-3.5 pl-14 pr-5 text-base shadow-sm outline-none focus:ring-2 focus:ring-emerald-500/50`}
               />
             </div>
           </form>
@@ -459,8 +465,8 @@ export default function App() {
 
         {/* States */}
         {loading && (
-          <div className={`mt-6 rounded-2xl ${cardBg} p-6 text-center text-sm ${dark ? "text-gray-300" : "text-gray-600"} shadow-sm`}>
-            Loading {ticker}…
+          <div className={`mt-6 rounded-2xl ${cardBg} p-10 shadow-sm`}>
+            <Spinner />
           </div>
         )}
 
@@ -478,10 +484,10 @@ export default function App() {
 
         {/* Result card */}
         {!loading && !error && data && score && (
-          <div className={`mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
+          <div key={data.symbol} className={`sp-card-enter mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold leading-tight">{data.symbol}</h2>
+                <h2 className={`text-3xl font-bold leading-tight ${dark ? "text-white" : "text-gray-900"}`}>{data.symbol}</h2>
                 <p className={`mt-1 text-base ${dark ? "text-gray-300" : "text-gray-700"}`}>{data.name}</p>
                 {data.industry && (
                   <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium ${dark ? "bg-white/10 text-gray-300" : "bg-black/5 text-gray-600"}`}>
