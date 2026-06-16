@@ -100,7 +100,10 @@ const metricExplanations = {
   roe: "Return on Equity: profit generated per dollar of shareholder equity. Higher is better.",
   margin: "Profit Margin: the share of revenue kept as profit after all expenses.",
   de: "Debt-to-Equity: how much debt the company carries vs. equity. Higher means more leverage and risk.",
+  grossMargin: "Gross Margin: revenue left after the direct cost of goods sold. Higher means stronger pricing power.",
+  currentRatio: "Current Ratio: short-term assets vs. short-term liabilities. Above 1 means bills are comfortably covered.",
   growth: "Revenue Growth YoY: the year-over-year change in annual revenue.",
+  analystTarget: "Analyst Target Price: the average price Wall Street analysts expect over the next year.",
 };
 
 // Returns an industry-specific caution string for a metric, or null.
@@ -111,6 +114,8 @@ const metricWarning = (key, data) => {
   const realEstateUtil = sector.includes("real estate") || sector.includes("utilit");
   const retail = sector.includes("retail") || industry.includes("retail") || sector.includes("consumer");
   const tech = sector.includes("technolog") || industry.includes("software") || industry.includes("semiconduct");
+
+  const grocery = retail || industry.includes("grocer") || industry.includes("food");
 
   switch (key) {
     case "pe":
@@ -130,6 +135,14 @@ const metricWarning = (key, data) => {
       if (retail && data.profitMargin !== null && data.profitMargin < 0.1)
         return "Thin margins are normal in retail/consumer — judge them against sector peers.";
       return null;
+    case "grossMargin":
+      if (grocery && data.grossMarginTTM !== null && data.grossMarginTTM < 0.2)
+        return "Thin gross margins are normal for retail/grocery — they make it up on volume.";
+      return null;
+    case "currentRatio":
+      if (grocery && data.currentRatio !== null && data.currentRatio < 1)
+        return "A current ratio below 1 is normal for some retailers thanks to fast inventory turnover.";
+      return null;
     case "growth":
       if ((realEstateUtil || financial) && data.revenueGrowthYoY !== null && data.revenueGrowthYoY < 5)
         return "Mature sectors like utilities and financials grow slowly — modest growth is expected.";
@@ -148,6 +161,8 @@ const buildMetricChips = (data) => ({
   quality: [
     { key: "roe", name: "ROE", value: fmtPct(data.returnOnEquityTTM) },
     { key: "margin", name: "Profit Margin", value: fmtPct(data.profitMargin) },
+    { key: "grossMargin", name: "Gross Margin", value: fmtPct(data.grossMarginTTM) },
+    { key: "currentRatio", name: "Current Ratio", value: fmtNum(data.currentRatio, 2) },
     { key: "de", name: "D/E", value: fmtNum(data.debtToEquityRatio, 2) },
   ],
   momentum: [
@@ -155,6 +170,11 @@ const buildMetricChips = (data) => ({
       key: "growth",
       name: "Revenue Growth YoY",
       value: data.revenueGrowthYoY === null ? "—" : `${data.revenueGrowthYoY.toFixed(1)}%`,
+    },
+    {
+      key: "analystTarget",
+      name: "Analyst Target",
+      value: data.analystTargetPrice === null ? "—" : `$${data.analystTargetPrice.toFixed(2)}`,
     },
   ],
 });
@@ -184,6 +204,22 @@ function MoonIcon({ className }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
+function StarIcon({ className, filled }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   );
 }
@@ -288,9 +324,22 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const stored = localStorage.getItem("sp_favorites");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const searchRef = useRef(null);
 
   const { data, loading, error } = useStockData(ticker);
+
+  // Persist favorites to localStorage whenever they change.
+  useEffect(() => {
+    localStorage.setItem("sp_favorites", JSON.stringify(favorites));
+  }, [favorites]);
 
   // Debounced SYMBOL_SEARCH autocomplete (fires at 3+ chars).
   useEffect(() => {
@@ -362,9 +411,20 @@ export default function App() {
     setHistory((prev) => prev.filter((t) => t !== symbol));
   };
 
+  const toggleFavorite = (symbol) => {
+    setFavorites((prev) =>
+      prev.includes(symbol) ? prev.filter((t) => t !== symbol) : [...prev, symbol]
+    );
+  };
+
+  const removeFavorite = (symbol) => {
+    setFavorites((prev) => prev.filter((t) => t !== symbol));
+  };
+
   const score = data ? scoreStock(data) : null;
   const vStyle = score ? verdictStyles[score.verdict] : null;
   const metricChips = data ? buildMetricChips(data) : null;
+  const isFavorite = data ? favorites.includes(data.symbol) : false;
 
   const pageBg = dark ? "bg-[#2C2C2A] text-gray-100" : "bg-[#F1EFE8] text-gray-900";
   const cardBg = dark ? "bg-[#444441]" : "bg-white";
@@ -431,6 +491,39 @@ export default function App() {
           )}
         </div>
 
+        {/* Favorites */}
+        {favorites.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {favorites.map((t) => (
+              <div
+                key={t}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                  t === ticker
+                    ? "bg-amber-500 text-white"
+                    : dark
+                    ? "bg-amber-400/15 text-amber-300 hover:bg-amber-400/25"
+                    : "bg-amber-400/20 text-amber-700 hover:bg-amber-400/30"
+                }`}
+              >
+                <StarIcon className="h-3.5 w-3.5" filled />
+                <button type="button" onClick={() => loadTicker(t)} className="font-semibold">
+                  {t}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeFavorite(t)}
+                  aria-label={`Remove ${t} from favorites`}
+                  className="opacity-60 hover:opacity-100"
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Tab history */}
         {history.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
@@ -495,14 +588,31 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <div className="text-right">
-                <p className="text-3xl font-extrabold tabular-nums">
-                  {score.finalScore.toFixed(1)}
-                  <span className={`text-base font-medium ${dark ? "text-gray-400" : "text-gray-500"}`}>/10</span>
-                </p>
-                <span className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${vStyle.badge}`}>
-                  {score.verdict}
-                </span>
+              <div className="flex items-start gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(data.symbol)}
+                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  aria-pressed={isFavorite}
+                  className={`mt-1 rounded-full p-2 transition-colors ${
+                    isFavorite
+                      ? "text-amber-500 hover:bg-amber-500/10"
+                      : dark
+                      ? "text-gray-400 hover:bg-white/10"
+                      : "text-gray-400 hover:bg-black/5"
+                  }`}
+                >
+                  <StarIcon className="h-5 w-5" filled={isFavorite} />
+                </button>
+                <div className="text-right">
+                  <p className="text-3xl font-extrabold tabular-nums">
+                    {score.finalScore.toFixed(1)}
+                    <span className={`text-base font-medium ${dark ? "text-gray-400" : "text-gray-500"}`}>/10</span>
+                  </p>
+                  <span className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${vStyle.badge}`}>
+                    {score.verdict}
+                  </span>
+                </div>
               </div>
             </div>
 

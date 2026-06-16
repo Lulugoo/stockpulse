@@ -49,6 +49,30 @@ const scoreRevenueGrowth = (growth) => {
   return 1;
 };
 
+const scoreGrossMargin = (margin) => {
+  if (margin === null || margin === undefined) return null;
+  if (margin > 0.4) return 10;
+  if (margin >= 0.2) return 7;
+  if (margin >= 0.1) return 5;
+  return 2;
+};
+
+const scoreCurrentRatio = (ratio) => {
+  if (ratio === null || ratio === undefined) return null;
+  if (ratio > 2) return 10;
+  if (ratio >= 1.5) return 8;
+  if (ratio >= 1) return 5;
+  return 2;
+};
+
+// Qualitative proxy: a positive analyst target is treated as a mild bullish
+// signal; a missing target is neutral.
+const scoreEarningsTrend = (analystTargetPrice) => {
+  if (analystTargetPrice === null || analystTargetPrice === undefined) return 5;
+  if (analystTargetPrice > 0) return 7;
+  return 2;
+};
+
 // Average over the non-null scores; returns 0 when no metric is available.
 const average = (scores) => {
   const valid = scores.filter((s) => s !== null);
@@ -78,9 +102,14 @@ export function scoreStock(data) {
   const qualityScore = average([
     scoreROE(d.returnOnEquityTTM),
     scoreProfitMargin(d.profitMargin),
+    scoreGrossMargin(d.grossMarginTTM),
+    scoreCurrentRatio(d.currentRatio),
   ]);
 
-  const momentumScore = average([scoreRevenueGrowth(d.revenueGrowthYoY)]);
+  const momentumScore = average([
+    scoreRevenueGrowth(d.revenueGrowthYoY),
+    scoreEarningsTrend(d.analystTargetPrice),
+  ]);
 
   const finalScore = round1(
     valueScore * 0.35 + qualityScore * 0.4 + momentumScore * 0.25

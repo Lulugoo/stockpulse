@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 
-const MOCK_MODE = true; // ← flip to false when using real API
+const API_KEY = import.meta.env.VITE_AV_API_KEY;
+const BASE_URL = "https://www.alphavantage.co/query";
+
+const MOCK_MODE = true; // ← flip to false for real data
 
 const MOCK_DATA = {
   symbol: "AAPL",
@@ -14,13 +17,12 @@ const MOCK_DATA = {
   debtToEquityRatio: 1.77,
   profitMargin: 0.272,
   grossProfitTTM: 216070996000,
+  grossMarginTTM: 0.479,
+  currentRatio: 1.07,
   marketCapitalization: 4275929874000,
   analystTargetPrice: 312.72,
   revenueGrowthYoY: 6.42,
 };
-
-const API_KEY = import.meta.env.VITE_AV_API_KEY;
-const BASE_URL = "https://www.alphavantage.co/query";
 
 const toNumber = (value) => {
   if (value === undefined || value === null || value === "" || value === "None") return null;
@@ -41,13 +43,13 @@ export function useStockData(ticker) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const cache = useRef({});  // ← persists across renders, never triggers re-render
+  const cache = useRef({});
 
   useEffect(() => {
     const symbol = ticker?.trim().toUpperCase();
     if (!symbol) return;
 
-    // Mock mode — returns fake data instantly, no API calls
+    // Mock mode
     if (MOCK_MODE) {
       setData({ ...MOCK_DATA, symbol });
       setLoading(false);
@@ -61,7 +63,7 @@ export function useStockData(ticker) {
       return;
     }
 
-    // ✅ Cache hit — return instantly, no API call
+    // Cache hit
     if (cache.current[symbol]) {
       setData(cache.current[symbol]);
       setError("");
@@ -112,14 +114,14 @@ export function useStockData(ticker) {
           debtToEquityRatio: toNumber(overview.DebtToEquityRatio),
           profitMargin: toNumber(overview.ProfitMargin),
           grossProfitTTM: toNumber(overview.GrossProfitTTM),
+          grossMarginTTM: toNumber(overview.GrossMarginTTM),
+          currentRatio: toNumber(overview.CurrentRatio),
           marketCapitalization: toNumber(overview.MarketCapitalization),
           analystTargetPrice: toNumber(overview.AnalystTargetPrice),
           revenueGrowthYoY: calcRevenueGrowth(income.annualReports),
         };
 
-        // ✅ Store in cache before setting state
         cache.current[symbol] = result;
-
         if (active) setData(result);
 
       } catch (err) {
