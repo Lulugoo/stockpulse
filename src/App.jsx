@@ -208,6 +208,26 @@ function MoonIcon({ className }) {
   );
 }
 
+function ShareIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 function StarIcon({ className, filled }) {
   return (
     <svg
@@ -332,9 +352,23 @@ export default function App() {
       return [];
     }
   });
+  const [copied, setCopied] = useState(false);
   const searchRef = useRef(null);
 
   const { data, loading, error } = useStockData(ticker);
+
+  // Deep link: load ?ticker=XYZ on startup.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initial = params.get("ticker");
+    if (initial) {
+      const clean = initial.trim().toUpperCase();
+      setTicker(clean);
+      setHistory([clean]);
+    }
+  }, []);
+
+
 
   // Persist favorites to localStorage whenever they change.
   useEffect(() => {
@@ -419,6 +453,14 @@ export default function App() {
 
   const removeFavorite = (symbol) => {
     setFavorites((prev) => prev.filter((t) => t !== symbol));
+  };
+
+  const handleShare = (symbol) => {
+    const url = `https://stockpulse-delta-eight.vercel.app/?ticker=${symbol}`;
+    navigator.clipboard?.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const score = data ? scoreStock(data) : null;
@@ -604,6 +646,23 @@ export default function App() {
                 >
                   <StarIcon className="h-5 w-5" filled={isFavorite} />
                 </button>
+                <div className="mt-1 flex items-center gap-1">
+                  {copied && <span className="text-xs font-medium text-emerald-500">Copied!</span>}
+                  <button
+                    type="button"
+                    onClick={() => handleShare(data.symbol)}
+                    aria-label="Copy share link"
+                    className={`rounded-full p-2 transition-colors ${
+                      copied
+                        ? "text-emerald-500 hover:bg-emerald-500/10"
+                        : dark
+                        ? "text-gray-400 hover:bg-white/10"
+                        : "text-gray-400 hover:bg-black/5"
+                    }`}
+                  >
+                    {copied ? <CheckIcon className="h-5 w-5" /> : <ShareIcon className="h-5 w-5" />}
+                  </button>
+                </div>
                 <div className="text-right">
                   <p className="text-3xl font-extrabold tabular-nums">
                     {score.finalScore.toFixed(1)}
