@@ -311,6 +311,49 @@ function MetricChip({ name, value, explanation, warning, dark }) {
   );
 }
 
+function FiftyTwoWeekBar({ low, high, current, dark }) {
+  if (low == null || high == null || current == null || high === low) return null;
+  const pct = Math.max(0, Math.min(100, ((current - low) / (high - low)) * 100));
+  const fill = pct < 50 ? "bg-amber-500" : "bg-emerald-500";
+  return (
+    <div className="mt-3">
+      <div className={`flex justify-between text-xs ${dark ? "text-gray-400" : "text-gray-500"}`}>
+        <span>52W Low ${low.toFixed(2)}</span>
+        <span>52W High ${high.toFixed(2)}</span>
+      </div>
+      <div className={`relative mt-1 h-1.5 w-full rounded-full ${dark ? "bg-white/10" : "bg-black/10"}`}>
+        <div className={`absolute left-0 top-0 h-1.5 rounded-full ${fill}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
+            dark ? "border-[#444441] bg-gray-100" : "border-white bg-gray-800"
+          }`}
+          style={{ left: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function EarningsBeatChip({ beatCount, dark }) {
+  if (beatCount == null) return null;
+  const classes =
+    beatCount >= 3
+      ? "bg-emerald-500/15 text-emerald-600"
+      : beatCount === 2
+      ? "bg-amber-500/15 text-amber-600"
+      : "bg-red-500/15 text-red-600";
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${classes}`}>
+      Beat {beatCount}/4 quarters
+      <Tooltip text="How often the company beat Wall Street earnings estimates over the last 4 quarters." dark={dark}>
+        <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-current text-[10px] font-bold">
+          ?
+        </span>
+      </Tooltip>
+    </span>
+  );
+}
+
 function CompareCatRow({ label, weight, a, b, dark }) {
   const cls = (x, y) =>
     x > y ? "text-emerald-500" : x < y ? "text-red-500" : dark ? "text-gray-200" : "text-gray-700";
@@ -343,7 +386,7 @@ function CompareCatRow({ label, weight, a, b, dark }) {
   );
 }
 
-function CategoryRow({ label, weight, score, dark, chips, data }) {
+function CategoryRow({ label, weight, score, dark, chips, data, extra }) {
   return (
     <div className="py-3">
       <div className="flex items-baseline justify-between">
@@ -374,6 +417,7 @@ function CategoryRow({ label, weight, score, dark, chips, data }) {
           ))}
         </div>
       )}
+      {extra}
     </div>
   );
 }
@@ -428,27 +472,6 @@ export default function App() {
       setShowDropdown(false);
       return;
     }
-  // Mock autocomplete for compare bar
-  const MOCK_SUGGESTIONS = [
-    { symbol: "AAPL", name: "Apple Inc" },
-    { symbol: "AMZN", name: "Amazon.com Inc" },
-    { symbol: "TSLA", name: "Tesla Inc" },
-    { symbol: "META", name: "Meta Platforms Inc" },
-    { symbol: "NVDA", name: "Nvidia Corporation" },
-    { symbol: "GOOGL", name: "Alphabet Inc" },
-    { symbol: "MSFT", name: "Microsoft Corporation" },
-    { symbol: "KO", name: "Coca-Cola Company" },
-    { symbol: "GME", name: "GameStop Corp" },
-    { symbol: "JPM", name: "JPMorgan Chase & Co" },
-  ];
-  const lowerB = keywords.toLowerCase();
-  const filteredB = MOCK_SUGGESTIONS.filter(
-    s => s.symbol.toLowerCase().includes(lowerB) ||
-        s.name.toLowerCase().includes(lowerB)
-  ).slice(0, 6);
-  setSuggestionsB(filteredB);
-  setShowDropdownB(filteredB.length > 0);
-  return;
 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
@@ -931,7 +954,29 @@ export default function App() {
             <div className={`mt-4 divide-y ${dark ? "divide-white/10" : "divide-black/5"}`}>
               <CategoryRow label="Value" weight="35%" score={score.valueScore} dark={dark} chips={metricChips.value} data={data} />
               <CategoryRow label="Quality" weight="40%" score={score.qualityScore} dark={dark} chips={metricChips.quality} data={data} />
-              <CategoryRow label="Momentum" weight="25%" score={score.momentumScore} dark={dark} chips={metricChips.momentum} data={data} />
+              <CategoryRow
+                label="Momentum"
+                weight="25%"
+                score={score.momentumScore}
+                dark={dark}
+                chips={metricChips.momentum}
+                data={data}
+                extra={
+                  <>
+                    <FiftyTwoWeekBar
+                      low={data.fiftyTwoWeekLow}
+                      high={data.fiftyTwoWeekHigh}
+                      current={data.fiftyDayMA}
+                      dark={dark}
+                    />
+                    {data.earningsBeatCount != null && (
+                      <div className="mt-3">
+                        <EarningsBeatChip beatCount={data.earningsBeatCount} dark={dark} />
+                      </div>
+                    )}
+                  </>
+                }
+              />
             </div>
 
             {/* Confidence signals */}

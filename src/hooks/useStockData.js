@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 
 const API_KEY = import.meta.env.VITE_AV_API_KEY;
 const BASE_URL = "https://www.alphavantage.co/query";
-
 const MOCK_MODE = true; // ← flip to false for real data
 
 const MOCK_DATA = {
@@ -22,6 +21,10 @@ const MOCK_DATA = {
   marketCapitalization: 4275929874000,
   analystTargetPrice: 312.72,
   revenueGrowthYoY: 6.42,
+  fiftyTwoWeekHigh: 260.10,
+  fiftyTwoWeekLow: 164.08,
+  fiftyDayMA: 198.45,
+  earningsBeatCount: 3,
 };
 
 const toNumber = (value) => {
@@ -30,6 +33,8 @@ const toNumber = (value) => {
   return Number.isNaN(parsed) ? null : parsed;
 };
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const calcRevenueGrowth = (reports) => {
   if (!Array.isArray(reports) || reports.length < 2) return null;
   const [latest, previous] = reports;
@@ -37,6 +42,17 @@ const calcRevenueGrowth = (reports) => {
   const prior = toNumber(previous?.totalRevenue);
   if (current === null || prior === null || prior === 0) return null;
   return ((current - prior) / prior) * 100;
+};
+
+const calcEarningsBeatCount = (quarterlyEarnings) => {
+  if (!Array.isArray(quarterlyEarnings) || quarterlyEarnings.length === 0) return null;
+  const quarters = quarterlyEarnings.slice(0, 4);
+  return quarters.reduce((count, q) => {
+    const actual = toNumber(q?.reportedEPS);
+    const estimate = toNumber(q?.estimatedEPS);
+    if (actual === null || estimate === null) return count;
+    return actual > estimate ? count + 1 : count;
+  }, 0);
 };
 
 export function useStockData(ticker) {
@@ -83,9 +99,7 @@ export function useStockData(ticker) {
           `${BASE_URL}?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
           { signal: controller.signal }
         );
-
-        await new Promise(resolve => setTimeout(resolve, 1200));
-
+        await delay(1200);
         const incomeRes = await fetch(
           `${BASE_URL}?function=INCOME_STATEMENT&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
           { signal: controller.signal }
@@ -99,8 +113,14 @@ export function useStockData(ticker) {
         if (overview.Note || income.Note || overview.Information || income.Information) {
           throw new Error(overview.Note || income.Note || overview.Information || income.Information);
         }
-
         if (!overview.Symbol) throw new Error(`No data found for "${symbol}".`);
+
+        await delay(1200);
+        const earningsRes = await fetch(
+          `${BASE_URL}?function=EARNINGS&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
+          { signal: controller.signal }
+        );
+        const earnings = earningsRes.ok ? await earningsRes.json() : {};
 
         const result = {
           symbol: overview.Symbol,
@@ -118,7 +138,11 @@ export function useStockData(ticker) {
           currentRatio: toNumber(overview.CurrentRatio),
           marketCapitalization: toNumber(overview.MarketCapitalization),
           analystTargetPrice: toNumber(overview.AnalystTargetPrice),
+          fiftyTwoWeekHigh: toNumber(overview["52WeekHigh"]),
+          fiftyTwoWeekLow: toNumber(overview["52WeekLow"]),
+          fiftyDayMA: toNumber(overview["50DayMovingAverage"]),
           revenueGrowthYoY: calcRevenueGrowth(income.annualReports),
+          earningsBeatCount: calcEarningsBeatCount(earnings.quarterlyEarnings),
         };
 
         cache.current[symbol] = result;

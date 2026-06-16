@@ -73,6 +73,35 @@ const scoreEarningsTrend = (analystTargetPrice) => {
   return 2;
 };
 
+// Where the current price sits within the 52-week range, as a percentage.
+const score52WeekPosition = (low, high, current) => {
+  if (
+    low === null ||
+    low === undefined ||
+    high === null ||
+    high === undefined ||
+    current === null ||
+    current === undefined ||
+    high === low
+  ) {
+    return null;
+  }
+  const pct = ((current - low) / (high - low)) * 100;
+  if (pct > 75) return 8;
+  if (pct >= 50) return 6;
+  if (pct >= 25) return 4;
+  return 2;
+};
+
+const scoreEarningsBeat = (beatCount) => {
+  if (beatCount === null || beatCount === undefined) return null;
+  if (beatCount === 4) return 10;
+  if (beatCount === 3) return 8;
+  if (beatCount === 2) return 5;
+  if (beatCount === 1) return 3;
+  return 1;
+};
+
 // Average over the non-null scores; returns 0 when no metric is available.
 const average = (scores) => {
   const valid = scores.filter((s) => s !== null);
@@ -109,6 +138,8 @@ export function scoreStock(data) {
   const momentumScore = average([
     scoreRevenueGrowth(d.revenueGrowthYoY),
     scoreEarningsTrend(d.analystTargetPrice),
+    score52WeekPosition(d.fiftyTwoWeekLow, d.fiftyTwoWeekHigh, d.fiftyDayMA),
+    scoreEarningsBeat(d.earningsBeatCount),
   ]);
 
   const finalScore = round1(
