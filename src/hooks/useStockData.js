@@ -95,15 +95,16 @@ export function useStockData(ticker) {
       setData(null);
 
       try {
-        const overviewRes = await fetch(
-          `${BASE_URL}?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
-          { signal: controller.signal }
-        );
+        const [overviewRes, incomeRes] = await Promise.all([
+          fetch(`${BASE_URL}?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`, { signal: controller.signal }),
+          fetch(`${BASE_URL}?function=INCOME_STATEMENT&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`, { signal: controller.signal }),
+        ]);
         await delay(1200);
-        const incomeRes = await fetch(
-          `${BASE_URL}?function=INCOME_STATEMENT&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
+        const earningsRes = await fetch(
+          `${BASE_URL}?function=EARNINGS&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
           { signal: controller.signal }
         );
+
 
         if (!overviewRes.ok || !incomeRes.ok) throw new Error("Failed to fetch data.");
 
