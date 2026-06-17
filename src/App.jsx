@@ -492,7 +492,8 @@ export default function App() {
     ).slice(0, 6);
   setSuggestions(filtered);
   setShowDropdown(filtered.length > 0);
-  
+  return;
+
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
