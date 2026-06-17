@@ -1,6 +1,9 @@
+import { supabase } from './lib/supabase'
+import AuthModal from './components/AuthModal'
 import { useState, useEffect, useRef } from "react";
 import useStockData from "./hooks/useStockData";
 import scoreStock from "./utils/scoreStock";
+
 
 const MAX_HISTORY = 5;
 
@@ -448,6 +451,19 @@ export default function App() {
 
   const { data, loading, error } = useStockData(ticker);
   const { data: dataB, loading: loadingB, error: errorB } = useStockData(tickerB);
+  const [user, setUser] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+
+  // Authorization stat
+  useEffect(() => {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setUser(session?.user ?? null)
+  })
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null)
+  })
+  return () => subscription.unsubscribe()
+}, [])
 
   // Deep link: load ?ticker=XYZ on startup.
   useEffect(() => {
@@ -696,6 +712,22 @@ export default function App() {
               Stock<span className="text-emerald-500">Pulse</span>
             </span>
           </div>
+        {user ? (
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className={`rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold ${dark ? 'bg-emerald-500 text-white' : 'bg-emerald-500 text-white'}`}
+            title="Sign out"
+          >
+            {user.email?.[0].toUpperCase()}
+          </button>
+        ) : (
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className={`text-sm font-medium px-4 py-2 rounded-full border-1.5 ${dark ? 'border-white/20 text-gray-300 hover:bg-white/10' : 'border-gray-300 text-gray-700 hover:bg-black/5'}`}
+          >
+            Sign in
+          </button>
+)}
           <button
             type="button"
             onClick={() => setDark((d) => !d)}
@@ -1051,6 +1083,9 @@ export default function App() {
           Based on fundamental metrics only. Not investment advice.
         </p>
       </div>
+      {showAuthModal && (
+  <AuthModal dark={dark} onClose={() => setShowAuthModal(false)} />
+)}
     </div>
   );
 }
