@@ -921,9 +921,9 @@ export default function App() {
 
         {/* Result card */}
         {!loading && !error && data && score && !showCompare && (
-          <div key={data.symbol} className={`sp-card-enter mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
+          <div key={data.symbol} className={`sp-card-enter relative mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
             <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-              <div>
+              <div className="text-center sm:text-left">
                 <h2 className={`text-3xl font-bold leading-tight ${dark ? "text-white" : "text-gray-900"}`}>{data.symbol}</h2>
                 <p className={`mt-1 text-base ${dark ? "text-gray-300" : "text-gray-700"}`}>{data.name}</p>
                 {data.industry && (
@@ -932,13 +932,13 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 absolute top-6 right-6 sm:relative sm:top-auto sm:right-auto">
                 <button
                   type="button"
                   onClick={() => toggleFavorite(data.symbol)}
                   aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
                   aria-pressed={isFavorite}
-                  className={`mt-1 rounded-full p-2 transition-colors ${
+                  className={`mt-0 rounded-full p-2 transition-colors ${
                     isFavorite
                       ? "text-amber-500 hover:bg-amber-500/10"
                       : dark
