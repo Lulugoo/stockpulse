@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 const API_KEY = import.meta.env.VITE_AV_API_KEY;
 const BASE_URL = "https://www.alphavantage.co/query";
-const MOCK_MODE = true; // ← flip to false for real data
+const MOCK_MODE = false; // ← flip to false for real data
 
 const MOCK_DATA = {
   symbol: "AAPL",
