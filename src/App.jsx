@@ -456,10 +456,10 @@ export default function App() {
 
   // Authorization stat
   useEffect(() => {
-  supabase.auth.getSession().then(({ data: { session } }) => {
+  supabase?.auth.getSession().then(({ data: { session } }) => {
     setUser(session?.user ?? null)
   })
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data: { subscription } } = supabase?.auth.onAuthStateChange((_event, session) => {
     setUser(session?.user ?? null)
   })
   return () => subscription.unsubscribe()
