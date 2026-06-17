@@ -96,15 +96,15 @@ export function useStockData(ticker) {
 
       try {
         const [overviewRes, incomeRes] = await Promise.all([
-          fetch(`${BASE_URL}?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`, { signal: controller.signal }),
-          fetch(`${BASE_URL}?function=INCOME_STATEMENT&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`, { signal: controller.signal }),
+          fetch(
+            `${BASE_URL}?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
+            { signal: controller.signal }
+          ),
+          fetch(
+            `${BASE_URL}?function=INCOME_STATEMENT&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
+            { signal: controller.signal }
+          ),
         ]);
-        await delay(1200);
-        const earningsRes = await fetch(
-          `${BASE_URL}?function=EARNINGS&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
-          { signal: controller.signal }
-        );
-
 
         if (!overviewRes.ok || !incomeRes.ok) throw new Error("Failed to fetch data.");
 
@@ -114,14 +114,17 @@ export function useStockData(ticker) {
         if (overview.Note || income.Note || overview.Information || income.Information) {
           throw new Error(overview.Note || income.Note || overview.Information || income.Information);
         }
+
         if (!overview.Symbol) throw new Error(`No data found for "${symbol}".`);
 
         await delay(1200);
+
         const earningsRes = await fetch(
           `${BASE_URL}?function=EARNINGS&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`,
           { signal: controller.signal }
         );
         const earnings = earningsRes.ok ? await earningsRes.json() : {};
+
 
         const result = {
           symbol: overview.Symbol,
