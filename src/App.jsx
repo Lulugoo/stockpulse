@@ -472,7 +472,28 @@ export default function App() {
       setShowDropdown(false);
       return;
     }
-
+     // Mock autocomplete — remove when MOCK_MODE is off
+    const MOCK_SUGGESTIONS = [
+      { symbol: "AAPL", name: "Apple Inc" },
+      { symbol: "AMZN", name: "Amazon.com Inc" },
+      { symbol: "TSLA", name: "Tesla Inc" },
+      { symbol: "META", name: "Meta Platforms Inc" },
+      { symbol: "NVDA", name: "Nvidia Corporation" },
+      { symbol: "GOOGL", name: "Alphabet Inc" },
+      { symbol: "MSFT", name: "Microsoft Corporation" },
+      { symbol: "KO", name: "Coca-Cola Company" },
+      { symbol: "GME", name: "GameStop Corp" },
+      { symbol: "JPM", name: "JPMorgan Chase & Co" },
+    ];
+      const lower = keywords.toLowerCase();
+      const filtered = MOCK_SUGGESTIONS.filter(
+        s => s.symbol.toLowerCase().includes(lower) ||
+         s.name.toLowerCase().includes(lower)
+    ).slice(0, 6);
+  setSuggestions(filtered);
+  setShowDropdown(filtered.length > 0);
+  return;
+  
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -504,15 +525,36 @@ export default function App() {
     };
   }, [query]);
 
-  // Debounced SYMBOL_SEARCH autocomplete for the compare (B) search bar.
-  useEffect(() => {
-    const keywords = queryB.trim();
-    if (keywords.length < 3) {
-      setSuggestionsB([]);
-      setShowDropdownB(false);
-      return;
-    }
+      // Debounced SYMBOL_SEARCH autocomplete for the compare (B) search bar.
+    useEffect(() => {
+      const keywords = queryB.trim();
+      if (keywords.length < 3) {
+        setSuggestionsB([]);
+        setShowDropdownB(false);
+        return;
+      }
 
+      const MOCK_SUGGESTIONS = [
+        { symbol: "AAPL", name: "Apple Inc" },
+        { symbol: "AMZN", name: "Amazon.com Inc" },
+        { symbol: "TSLA", name: "Tesla Inc" },
+        { symbol: "META", name: "Meta Platforms Inc" },
+        { symbol: "NVDA", name: "Nvidia Corporation" },
+        { symbol: "GOOGL", name: "Alphabet Inc" },
+        { symbol: "MSFT", name: "Microsoft Corporation" },
+        { symbol: "KO", name: "Coca-Cola Company" },
+        { symbol: "GME", name: "GameStop Corp" },
+        { symbol: "JPM", name: "JPMorgan Chase & Co" },
+      ];
+      const lower = keywords.toLowerCase();
+      const filtered = MOCK_SUGGESTIONS.filter(
+        s => s.symbol.toLowerCase().includes(lower) ||
+            s.name.toLowerCase().includes(lower)
+      ).slice(0, 6);
+      setSuggestionsB(filtered);
+      setShowDropdownB(filtered.length > 0);
+      return;
+      
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
