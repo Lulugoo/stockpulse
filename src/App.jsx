@@ -554,7 +554,7 @@ export default function App() {
       setSuggestionsB(filtered);
       setShowDropdownB(filtered.length > 0);
       return;
-      
+
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -688,7 +688,7 @@ export default function App() {
         }
         .sp-card-enter { animation: spCardEnter 300ms ease-out; }
       `}</style>
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className="mx-auto max-w-3xl px-3 sm:px-4 py-8">
         {/* Header */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -922,12 +922,12 @@ export default function App() {
         {/* Result card */}
         {!loading && !error && data && score && !showCompare && (
           <div key={data.symbol} className={`sp-card-enter mt-6 rounded-2xl ${cardBg} p-6 shadow-sm`}>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
               <div>
                 <h2 className={`text-3xl font-bold leading-tight ${dark ? "text-white" : "text-gray-900"}`}>{data.symbol}</h2>
                 <p className={`mt-1 text-base ${dark ? "text-gray-300" : "text-gray-700"}`}>{data.name}</p>
                 {data.industry && (
-                  <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium ${dark ? "bg-white/10 text-gray-300" : "bg-black/5 text-gray-600"}`}>
+                  <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium max-w-[200px] truncate ${dark ? "bg-white/10 text-gray-300" : "bg-black/5 text-gray-600"}`}>
                     {data.industry}
                   </span>
                 )}
@@ -980,7 +980,7 @@ export default function App() {
                 >
                   <SplitIcon className="h-5 w-5" />
                 </button>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-3xl font-extrabold tabular-nums">
                     {score.finalScore.toFixed(1)}
                     <span className={`text-base font-medium ${dark ? "text-gray-400" : "text-gray-500"}`}>/10</span>
