@@ -32,8 +32,34 @@ const PRO_FEATURES = [
   { label: "Early access to new features", included: true },
 ];
 
-export default function PricingModal({ dark, onClose }) {
+export default function PricingModal({ dark, onClose, user }) {
   const [yearly, setYearly] = useState(false);
+    const handleUpgrade = async (plan) => {
+        if (!user) return;
+        
+        const priceId = plan === "yearly"
+            ? import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID
+            : import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID;
+
+        try {
+            const res = await fetch("/api/create-checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                priceId,
+                userId: user.id,
+                email: user.email,
+            }),
+            });
+
+            const { url, error } = await res.json();
+            if (error) throw new Error(error);
+            window.location.href = url;
+        } catch (err) {
+            console.error("Checkout error:", err);
+            alert("Something went wrong. Please try again.");
+        }
+    };
 
   const price = yearly ? "$4.08" : "$6.99";
   const btnLabel = yearly ? "Upgrade to Pro — $49/yr" : "Upgrade to Pro — $6.99/mo";
@@ -110,7 +136,7 @@ export default function PricingModal({ dark, onClose }) {
               ))}
             </ul>
             <button
-              onClick={() => alert("Stripe coming soon!")}
+              onClick={() => handleUpgrade(yearly ? "yearly" : "monthly")}
               className="w-full rounded-full bg-emerald-500 py-2 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
             >
               {btnLabel}

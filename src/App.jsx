@@ -1111,7 +1111,7 @@ export default function App() {
         <AuthModal dark={dark} onClose={() => setShowAuthModal(false)} />
       )}
       {showUpgradeModal && (
-        <PricingModal dark={dark} onClose={() => setShowUpgradeModal(false)} />
+        <PricingModal dark={dark} onClose={() => setShowUpgradeModal(false)} user={user} />
       )}
     </div>
       } />
