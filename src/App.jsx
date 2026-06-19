@@ -463,13 +463,20 @@ export default function App() {
 
 
   useEffect(() => {
-    const intent = sessionStorage.getItem('pricingIntent');
-    if (intent) {
-      sessionStorage.removeItem('pricingIntent');
+  const intent = sessionStorage.getItem('pricingIntent');
+  if (intent) {
+    sessionStorage.removeItem('pricingIntent');
+    setTimeout(() => {
       setPricingIntent(true);
-      setShowAuthModal(true);
-    }
-  }, []);
+      if (user) {
+        setShowUpgradeModal(true);
+      } else {
+        setShowAuthModal(true);
+      }
+    }, 500);
+  }
+}, []);
+
 
 
   useEffect(() => {
