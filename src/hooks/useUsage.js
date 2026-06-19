@@ -44,7 +44,8 @@ export function useUsage(user) {
         .from("user_profiles")
         .select("is_pro")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
+
 
       setIsPro(profile?.is_pro === true);
 
@@ -53,7 +54,8 @@ export function useUsage(user) {
         .select("lookup_count")
         .eq("user_id", user.id)
         .eq("date", todayStr())
-        .single();
+        .maybeSingle();
+
 
       setUsageCount(usage?.lookup_count ?? 0);
       setLoading(false);
