@@ -17,14 +17,14 @@ const STEPS = [
     description:
       "StockPulse pulls live data from Alpha Vantage — P/E, P/B, ROE, profit margins, revenue growth, analyst targets, and more.",
     chips: [
-      { label: "P/E ratio", color: "blue" },
-      { label: "P/B ratio", color: "blue" },
-      { label: "PEG", color: "blue" },
-      { label: "ROE", color: "teal" },
-      { label: "Gross margin", color: "teal" },
-      { label: "D/E ratio", color: "teal" },
-      { label: "Revenue growth", color: "purple" },
-      { label: "52-week range", color: "purple" },
+      { label: "P/E ratio", color: "value" },
+      { label: "P/B ratio", color: "value" },
+      { label: "PEG", color: "value" },
+      { label: "ROE", color: "quality" },
+      { label: "Gross margin", color: "quality" },
+      { label: "D/E ratio", color: "quality" },
+      { label: "Revenue growth", color: "momentum" },
+      { label: "52-week range", color: "momentum" },
     ],
   },
   {
@@ -33,9 +33,9 @@ const STEPS = [
     description:
       "Our engine weighs each metric across three dimensions to produce a single composite score out of 100.",
     pills: [
-      { label: "Value · 35%", color: "blue" },
-      { label: "Quality · 40%", color: "purple" },
-      { label: "Momentum · 25%", color: "teal" },
+      { label: "Value · 35%" },
+      { label: "Quality · 40%" },
+      { label: "Momentum · 25%" },
     ],
   },
   {
@@ -87,54 +87,53 @@ const FAQS = [
   },
 ];
 
-const chipColorClasses = {
-  blue: "bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
-  teal: "bg-teal-50 text-teal-800 border-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:border-teal-700",
-  purple: "bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
-};
-
-const pillColorClasses = {
-  blue: "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  teal: "bg-teal-50 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
-  purple: "bg-purple-50 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-};
-
-function Chip({ label, color }) {
-  const colorClass = color
-    ? chipColorClasses[color]
-    : "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700";
+function Chip({ label, color, dark }) {
+  const colorMap = {
+    value: dark
+      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+      : "bg-emerald-50 text-emerald-700 border-emerald-200",
+    quality: dark
+      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+      : "bg-emerald-50 text-emerald-700 border-emerald-200",
+    momentum: dark
+      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+      : "bg-emerald-50 text-emerald-700 border-emerald-200",
+  };
+  const defaultClass = dark
+    ? "bg-white/10 text-gray-300 border-white/10"
+    : "bg-black/5 text-gray-600 border-black/10";
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border ${colorClass}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium border ${color ? colorMap[color] : defaultClass}`}>
       {label}
     </span>
   );
 }
 
-function FaqItem({ question, answer }) {
+function FaqItem({ question, answer, dark }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700">
+    <div className={`border-b last:border-b-0 ${dark ? "border-white/10" : "border-black/10"}`}>
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex justify-between items-center gap-4 py-4 text-left"
         aria-expanded={open}
       >
-        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{question}</span>
+        <span className={`text-sm font-semibold ${dark ? "text-gray-100" : "text-gray-900"}`}>{question}</span>
         <svg
-          className={`w-4 h-4 flex-shrink-0 text-gray-400 transition-transform duration-200 ${open ? "rotate-45" : ""}`}
+          className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${open ? "rotate-45" : ""} ${dark ? "text-gray-400" : "text-gray-400"}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
         </svg>
       </button>
       {open && (
-        <p className="pb-4 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{answer}</p>
+        <p className={`pb-4 text-sm leading-relaxed ${dark ? "text-gray-400" : "text-gray-600"}`}>{answer}</p>
       )}
     </div>
   );
 }
 
-export default function HowItWorks() {
+export default function HowItWorks({ dark }) {
   const [user, setUser] = useState(null);
   const [userLoaded, setUserLoaded] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -155,87 +154,98 @@ export default function HowItWorks() {
     }
   };
 
+  const pageBg = dark ? "bg-[#2C2C2A]" : "bg-[#F1EFE8]";
+  const cardBg = dark ? "bg-[#444441]" : "bg-white";
+  const headingColor = dark ? "text-gray-100" : "text-gray-900";
+  const textSecondary = dark ? "text-gray-400" : "text-gray-600";
+  const borderColor = dark ? "border-white/10" : "border-black/10";
+  const lineColor = dark ? "bg-white/10" : "bg-black/10";
+  const numBg = dark ? "bg-[#444441] border-white/10 text-gray-400" : "bg-white border-black/10 text-gray-400";
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
+    <div className={`min-h-screen w-full ${pageBg} transition-colors`}>
+      <div className="mx-auto max-w-2xl px-4 py-12">
 
-        {/* Header */}
-        <div className="mb-10">
-          <p className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-2">How it works</p>
-          <h1 className="text-3xl font-medium text-gray-900 dark:text-gray-100 mb-3">
-            Smarter stock analysis, instantly
-          </h1>
-          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">
-            StockPulse scores any stock in seconds using the same metrics professionals rely on — no spreadsheets needed.
+        {/* Logo */}
+        <a href="/" className="inline-flex items-center mb-6 text-xl font-extrabold tracking-tight text-gray-900">
+          <span className={dark ? "text-gray-100" : "text-gray-900"}>Stock</span>
+          <span className="text-emerald-500">Pulse</span>
+        </a>
+
+        <div className={`rounded-2xl ${cardBg} p-8 shadow-sm`}>
+
+          {/* Header */}
+          <h1 className={`text-2xl font-bold mb-1 ${headingColor}`}>How it works</h1>
+          <p className={`text-sm mb-8 ${textSecondary}`}>
+            Score any stock in seconds using the same metrics professionals rely on.
           </p>
-        </div>
 
-        {/* Steps */}
-        <div className="flex flex-col">
-          {STEPS.map((step, i) => (
-            <div key={step.number} className="flex gap-5">
-              <div className="flex flex-col items-center flex-shrink-0">
-                <div className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-xs font-medium text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-950 z-10">
-                  {step.number}
-                </div>
-                {i < STEPS.length - 1 && <div className="w-px flex-1 bg-gray-200 dark:bg-gray-700 mt-2" />}
-              </div>
-              <div className={`pb-8 flex-1 ${i === STEPS.length - 1 ? "pb-0" : ""}`}>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1 pt-1">{step.heading}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-3">{step.description}</p>
-                {step.chips && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {step.chips.map((chip) => <Chip key={chip.label} label={chip.label} color={chip.color} />)}
-                  </div>
-                )}
-                {step.pills && (
-                  <div className="flex flex-wrap gap-2">
-                    {step.pills.map((pill) => (
-                      <span key={pill.label} className={`text-xs font-medium px-3 py-1 rounded-full ${pillColorClasses[pill.color]}`}>
-                        {pill.label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-200 dark:border-gray-700 my-12" />
-
-        {/* FAQ */}
-        <div>
-          <p className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-2">FAQ</p>
-          <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-6">Common questions</h2>
+          {/* Steps */}
           <div className="flex flex-col">
-            {FAQS.map((faq) => <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />)}
-            <div className="border-t border-gray-200 dark:border-gray-700" />
+            {STEPS.map((step, i) => (
+              <div key={step.number} className="flex gap-4">
+                <div className="flex flex-col items-center flex-shrink-0">
+                  <div className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-semibold flex-shrink-0 ${numBg}`}>
+                    {step.number}
+                  </div>
+                  {i < STEPS.length - 1 && <div className={`w-px flex-1 mt-2 ${lineColor}`} />}
+                </div>
+                <div className={`flex-1 ${i < STEPS.length - 1 ? "pb-6" : "pb-0"}`}>
+                  <p className={`text-sm font-semibold mb-1 pt-0.5 ${headingColor}`}>{step.heading}</p>
+                  <p className={`text-sm leading-relaxed mb-3 ${textSecondary}`}>{step.description}</p>
+                  {step.chips && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {step.chips.map((chip) => <Chip key={chip.label} label={chip.label} color={chip.color} dark={dark} />)}
+                    </div>
+                  )}
+                  {step.pills && (
+                    <div className="flex flex-wrap gap-2">
+                      {step.pills.map((pill) => (
+                        <span key={pill.label} className="text-xs font-medium px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-600">
+                          {pill.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
 
-        {/* Footer CTA */}
-        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
-          <a
-            href="/"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors"
-          >
-            Start analyzing stocks
-          </a>
-          <button
-            onClick={handleViewPricing}
-            disabled={!userLoaded}
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            View pricing
-          </button>
-        </div>
+          {/* Divider */}
+          <div className={`border-t my-8 ${borderColor}`} />
 
+          {/* FAQ */}
+          <h2 className={`text-sm font-semibold mb-4 ${headingColor}`}>Common questions</h2>
+          <div>
+            {FAQS.map((faq) => (
+              <FaqItem key={faq.question} question={faq.question} answer={faq.answer} dark={dark} />
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className={`mt-8 pt-6 border-t flex flex-col sm:flex-row gap-3 ${borderColor}`}>
+            <a
+              href="/"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
+            >
+              Start analyzing stocks
+            </a>
+            <button
+              onClick={handleViewPricing}
+              disabled={!userLoaded}
+              className={`inline-flex items-center justify-center px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors disabled:opacity-50 ${dark ? "border-white/20 text-gray-300 hover:bg-white/10" : "border-gray-300 text-gray-700 hover:bg-black/5"}`}
+            >
+              View pricing
+            </button>
+          </div>
+
+        </div>
       </div>
 
       {showAuth && (
         <AuthModal
+          dark={dark}
           onClose={() => setShowAuth(false)}
           onSuccess={() => {
             setShowAuth(false);
@@ -243,9 +253,8 @@ export default function HowItWorks() {
           }}
         />
       )}
-
       {showPricing && (
-        <PricingModal user={user} onClose={() => setShowPricing(false)} />
+        <PricingModal dark={dark} user={user} onClose={() => setShowPricing(false)} />
       )}
     </div>
   );

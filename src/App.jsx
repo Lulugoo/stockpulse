@@ -730,7 +730,7 @@ export default function App() {
       <Route path="/privacy" element={<PrivacyPolicy dark={dark} />} />
       <Route path="/terms" element={<TermsOfService dark={dark} />} />
       <Route path="/refunds" element={<RefundPolicy dark={dark} />} />
-      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/how-it-works" element={<HowItWorks dark={dark} />} />
       <Route path="*" element={
     <div className={`min-h-screen w-full ${pageBg} transition-colors`}>
 
