@@ -35,19 +35,11 @@ const PRO_FEATURES = [
 export default function PricingModal({ dark, onClose, user }) {
   const [yearly, setYearly] = useState(false);
     const handleUpgrade = async (plan) => {
-        console.log("user:", user);
-        console.log("plan:", plan);
-        if (!user) {
-            alert("Not logged in - user is: " + JSON.stringify(user));
-            return;
-        }
+        if (!user) return;
 
         const priceId = plan === "yearly"
-            ? "price_1Tk6WVDNfUsWljb3IznYgtHt"
-            : "price_1Tk6WVDNfUsWljb3oushspuo";
-
-
-        console.log("priceId:", priceId);
+            ? import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID
+            : import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID;
 
         try {
             const res = await fetch("/api/create-checkout-session", {

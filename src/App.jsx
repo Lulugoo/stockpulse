@@ -637,7 +637,7 @@ export default function App() {
   const removeFavorite = (symbol) => toggleFavorite(symbol);
 
   const handleShare = (symbol) => {
-    const url = `https://stockpulse-delta-eight.vercel.app/?ticker=${symbol}`;
+    const url = `${import.meta.env.VITE_APP_URL || "https://stockpulse-delta-eight.vercel.app"}/?ticker=${symbol}`;
     navigator.clipboard?.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
