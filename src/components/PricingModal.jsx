@@ -43,8 +43,9 @@ export default function PricingModal({ dark, onClose, user }) {
         }
 
         const priceId = plan === "yearly"
-            ? import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID
-            : import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID;
+            ? "price_1Tk6WVDNfUsWljb3IznYgtHt"
+            : "price_1Tk6WVDNfUsWljb3oushspuo";
+
 
         console.log("priceId:", priceId);
 
