@@ -459,10 +459,12 @@ export default function App() {
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
   const location = useLocation();
+  const [pricingIntent, setPricingIntent] = useState(false);
 
   useEffect(() => {
   if (location.state?.openPricing) {
     if (!user) {
+      setPricingIntent(true);  // ← add this
       setShowAuthModal(true);
     } else {
       setShowUpgradeModal(true);
@@ -1150,7 +1152,16 @@ export default function App() {
         </div>
       </div>
       {showAuthModal && (
-        <AuthModal dark={dark} onClose={() => setShowAuthModal(false)} />
+        <AuthModal
+          dark={dark}
+          onClose={() => { setShowAuthModal(false); setPricingIntent(false); }}
+          onSuccess={() => {
+            if (pricingIntent) {
+              setPricingIntent(false);
+              setShowUpgradeModal(true);
+            }
+          }}
+        />
       )}
       {showUpgradeModal && (
         <PricingModal dark={dark} onClose={() => setShowUpgradeModal(false)} user={user} />

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function AuthModal({ dark, onClose }) {
+export default function AuthModal({ dark, onClose, onSuccess }) {
   const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,7 +17,10 @@ export default function AuthModal({ dark, onClose }) {
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
-      else onClose()
+      else {
+        onClose()
+        onSuccess?.()
+      }
     } else {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
