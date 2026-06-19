@@ -251,23 +251,15 @@ export default function HowItWorks() {
 
         {/* Footer CTA */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors"
-          >
+          <a href="/" className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors">
             Start analyzing stocks
-          </Link>
-          <Link
-            to="/"
-            onClick={() => {
-              setTimeout(() => {
-                document.querySelector("[data-pricing-modal]")?.click();
-              }, 100);
-            }}
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            View pricing
-          </Link>
+          </a>
+        <button
+          onClick={() => navigate("/", { state: { openPricing: true } })}
+          className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        >
+          View pricing
+        </button>
         </div>
 
       </div>
