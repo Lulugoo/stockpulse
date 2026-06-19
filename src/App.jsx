@@ -658,6 +658,12 @@ export default function App() {
     await loadTicker(query);
   };
 
+  const handleSubmitB = (e) => {
+    e.preventDefault();
+    loadTickerB(queryB);
+  };
+
+
 
   const exitCompare = () => {
     setCompareMode(false);
