@@ -7,7 +7,7 @@ import { useFavorites } from "./hooks/useFavorites";
 import { useUsage } from "./hooks/useUsage";
 import UpgradePrompt from "./components/UpgradePrompt";
 import PricingModal from "./components/PricingModal";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -462,8 +462,9 @@ export default function App() {
   const [pricingIntent, setPricingIntent] = useState(false);
 
   useEffect(() => {
-    if (location.state?.openPricing) {
-      window.history.replaceState({}, "");
+    const intent = sessionStorage.getItem('pricingIntent');
+    if (intent) {
+      sessionStorage.removeItem('pricingIntent');
       if (user) {
         setShowUpgradeModal(true);
       } else {
@@ -471,7 +472,8 @@ export default function App() {
         setShowAuthModal(true);
       }
     }
-  }, [location.state]);
+  }, []); 
+
 
   useEffect(() => {
   if (user && pricingIntent) {

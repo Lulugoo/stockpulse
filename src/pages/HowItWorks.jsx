@@ -255,7 +255,10 @@ export default function HowItWorks() {
             Start analyzing stocks
           </a>
         <button
-          onClick={() => navigate("/", { state: { openPricing: true } })}
+          onClick={() => {
+            sessionStorage.setItem('pricingIntent', 'true');
+            navigate("/");
+          }}
           className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           View pricing
