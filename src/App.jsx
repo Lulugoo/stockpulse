@@ -459,19 +459,17 @@ export default function App() {
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
   const [pricingIntent, setPricingIntent] = useState(false);
+  const location = useLocation();
+
 
   useEffect(() => {
     const intent = sessionStorage.getItem('pricingIntent');
     if (intent) {
       sessionStorage.removeItem('pricingIntent');
-      if (user) {
-        setShowUpgradeModal(true);
-      } else {
-        setPricingIntent(true);
-        setShowAuthModal(true);
-      }
+      setPricingIntent(true);
+      setShowAuthModal(true);
     }
-  }, []); 
+  }, []);
 
 
   useEffect(() => {
