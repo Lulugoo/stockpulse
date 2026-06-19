@@ -727,7 +727,7 @@ export default function App() {
                   body: JSON.stringify({ userId: user.id }),
                 });
                 const { url, error } = await res.json();
-                if (url) window.location.href = url;
+                if (url) window.open(url, "_blank");
                 else alert("Could not open billing portal: " + error);
               }}
               className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${dark ? 'border-white/20 text-gray-300 hover:bg-white/10' : 'border-gray-300 text-gray-600 hover:bg-black/5'}`}
