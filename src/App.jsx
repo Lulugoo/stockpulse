@@ -11,8 +11,7 @@ import { Routes, Route } from "react-router-dom";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import TermsOfService from "./pages/TermsOfService";
-
-
+import HowItWorks from "./pages/HowItWorks";
 
 
 const MAX_HISTORY = 5;
@@ -698,6 +697,7 @@ export default function App() {
       <Route path="/privacy" element={<PrivacyPolicy dark={dark} />} />
       <Route path="/terms" element={<TermsOfService dark={dark} />} />
       <Route path="/refunds" element={<RefundPolicy dark={dark} />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="*" element={
     <div className={`min-h-screen w-full ${pageBg} transition-colors`}>
 
@@ -1130,6 +1130,8 @@ export default function App() {
           <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:underline">Terms</a>
           <span>·</span>
           <a href="/refunds" target="_blank" rel="noopener noreferrer" className="hover:underline">Refunds</a>
+          <span>·</span>
+          <a href="/how-it-works" target="_blank" rel="noopener noreferrer" className="hover:underline">How it works</a>
         </div>
       </div>
       {showAuthModal && (
