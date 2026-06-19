@@ -6,6 +6,8 @@ import scoreStock from "./utils/scoreStock";
 import { useFavorites } from "./hooks/useFavorites"; 
 import { useUsage } from "./hooks/useUsage";
 import UpgradePrompt from "./components/UpgradePrompt";
+import PricingModal from "./components/PricingModal";
+
 
 
 
