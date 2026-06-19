@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import useStockData from "./hooks/useStockData";
 import scoreStock from "./utils/scoreStock";
 import { useFavorites } from "./hooks/useFavorites"; 
+import { useUsage } from "./hooks/useUsage";
+import UpgradePrompt from "./components/UpgradePrompt";
+
 
 
 const MAX_HISTORY = 5;
@@ -447,6 +450,7 @@ export default function App() {
   const [user, setUser] = useState(null) // ← user defined here
   const [showAuthModal, setShowAuthModal] = useState(false)
   const { favorites, toggleFavorite } = useFavorites(user);
+  const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
 
   // Authorization stat
   useEffect(() => {
@@ -605,20 +609,19 @@ export default function App() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const loadTicker = (symbol) => {
+  const loadTicker = async (symbol) => {
     const clean = symbol.trim().toUpperCase();
     if (!clean) return;
+
+    const { allowed } = await trackLookup();
+    if (!allowed) return; // UpgradePrompt will show via isAtLimit
+
     setTicker(clean);
     setQuery("");
     setSuggestions([]);
     setShowDropdown(false);
     setHistory((prev) => [clean, ...prev.filter((t) => t !== clean)].slice(0, MAX_HISTORY));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    loadTicker(query);
-  };
+};
 
   const removeTab = (symbol) => {
     setHistory((prev) => prev.filter((t) => t !== symbol));
@@ -867,6 +870,16 @@ export default function App() {
         )}
 
         {/* States */}
+        {isAtLimit && (
+          <UpgradePrompt
+            dark={dark}
+            onSignIn={() => setShowAuthModal(true)}
+            isGuest={!user}
+            limit={user ? 5 : 3}
+            remaining={remaining}
+          />
+        )}
+
         {loading && (
           <div className={`mt-6 rounded-2xl ${cardBg} p-10 shadow-sm`}>
             <Spinner />
