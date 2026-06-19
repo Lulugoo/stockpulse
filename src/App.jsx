@@ -12,6 +12,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import HowItWorks from "./pages/HowItWorks";
+import { Routes, Route, useLocation } from "react-router-dom";
+
 
 
 const MAX_HISTORY = 5;
@@ -457,6 +459,19 @@ export default function App() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
+  const location = useLocation();
+
+  useEffect(() => {
+  if (location.state?.openPricing) {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      setShowUpgradeModal(true);
+    }
+    window.history.replaceState({}, ""); // clear the state so it doesn't re-trigger
+    }
+  }, [location.state, user]);
+
 
   // Authorization stat
   useEffect(() => {
@@ -614,6 +629,7 @@ export default function App() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
 
   const loadTicker = async (symbol) => {
     const clean = symbol.trim().toUpperCase();

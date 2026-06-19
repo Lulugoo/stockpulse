@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 const STEPS = [
   {
@@ -160,6 +161,7 @@ function FaqItem({ question, answer }) {
 }
 
 export default function HowItWorks() {
+    const navigate = useNavigate(); // ← right here, line 1 inside the function
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
