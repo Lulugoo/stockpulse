@@ -449,6 +449,7 @@ export default function App() {
   const { data: dataB, loading: loadingB, error: errorB } = useStockData(tickerB);
   const [user, setUser] = useState(null) // ← user defined here
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
 
@@ -994,7 +995,15 @@ export default function App() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => (compareMode ? exitCompare() : setCompareMode(true))}
+                  onClick={() => {
+                  if (compareMode) {
+                    exitCompare();
+                  } else if (!isPro) {
+                    setShowUpgradeModal(true);
+                  } else {
+                    setCompareMode(true);
+                  }
+                  }}
                   aria-label="Compare with another stock"
                   aria-pressed={compareMode}
                   className={`mt-1 rounded-full p-2 transition-colors ${
@@ -1079,8 +1088,37 @@ export default function App() {
         </p>
       </div>
       {showAuthModal && (
-  <AuthModal dark={dark} onClose={() => setShowAuthModal(false)} />
-)}
+        <AuthModal dark={dark} onClose={() => setShowAuthModal(false)} />
+      )}
+          {showUpgradeModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className={`w-full max-w-sm rounded-2xl p-6 text-center shadow-xl ${dark ? "bg-[#444441]" : "bg-white"}`}>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/15">
+            <SplitIcon className="h-6 w-6 text-amber-500" />
+          </div>
+          <h3 className={`text-base font-bold ${dark ? "text-gray-100" : "text-gray-900"}`}>
+            Compare is a Pro feature
+          </h3>
+          <p className={`mt-1.5 text-sm ${dark ? "text-gray-400" : "text-gray-600"}`}>
+            Upgrade to Pro to compare any two stocks side by side.
+          </p>
+          <div className="mt-4 flex flex-col gap-2">
+            <button
+              onClick={() => alert("Stripe coming soon!")}
+              className="w-full rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-600"
+            >
+              Upgrade to Pro — $6.99/mo
+            </button>
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className={`w-full rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${dark ? "bg-white/10 text-gray-100 hover:bg-white/20" : "bg-black/5 text-gray-700 hover:bg-black/10"}`}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
