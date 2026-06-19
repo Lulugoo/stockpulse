@@ -462,16 +462,26 @@ export default function App() {
   const [pricingIntent, setPricingIntent] = useState(false);
 
   useEffect(() => {
-  if (location.state?.openPricing) {
-    if (!user) {
-      setPricingIntent(true);  // ← add this
-      setShowAuthModal(true);
-    } else {
-      setShowUpgradeModal(true);
+    if (location.state?.openPricing) {
+      window.history.replaceState({}, "");
+      if (user) {
+        setShowUpgradeModal(true);
+      } else {
+        setPricingIntent(true);
+        setShowAuthModal(true);
+      }
     }
-    window.history.replaceState({}, ""); // clear the state so it doesn't re-trigger
-    }
-  }, [location.state, user]);
+  }, [location.state]);
+
+  useEffect(() => {
+  if (user && pricingIntent) {
+    setPricingIntent(false);
+    setShowAuthModal(false);
+    setShowUpgradeModal(true);
+  }
+}, [user, pricingIntent]);
+
+
 
 
   // Authorization stat
