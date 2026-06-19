@@ -9,6 +9,9 @@ export default function PrivacyPolicy({ dark }) {
   return (
     <div className={`min-h-screen w-full ${pageBg} transition-colors`}>
       <div className={`mx-auto max-w-2xl px-4 py-12`}>
+        <a href="/" className="inline-flex items-center gap-1 mb-6 text-xl font-extrabold tracking-tight">
+          Stock<span className="text-emerald-500">Pulse</span>
+        </a>
         <div className={`rounded-2xl ${cardBg} p-8 shadow-sm`}>
           <h1 className={`text-2xl font-bold mb-1 ${headingColor}`}>Privacy Policy</h1>
           <p className={`text-xs mb-8 ${textSecondary}`}>Last updated: June 19, 2025</p>
