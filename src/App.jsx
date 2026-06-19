@@ -1097,8 +1097,15 @@ export default function App() {
 
         {/* Disclaimer */}
         <p className={`mt-8 text-center text-xs ${dark ? "text-gray-500" : "text-gray-400"}`}>
-          Based on fundamental metrics only. Not investment advice.
+        Based on fundamental metrics only. Not investment advice.
         </p>
+        <div className={`mt-3 flex items-center justify-center gap-4 text-xs ${dark ? "text-gray-500" : "text-gray-500"}`}>
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:underline">Privacy</a>
+          <span>·</span>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:underline">Terms</a>
+          <span>·</span>
+          <a href="/refunds" target="_blank" rel="noopener noreferrer" className="hover:underline">Refunds</a>
+        </div>
       </div>
       {showAuthModal && (
         <AuthModal dark={dark} onClose={() => setShowAuthModal(false)} />
