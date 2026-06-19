@@ -7,12 +7,11 @@ import { useFavorites } from "./hooks/useFavorites";
 import { useUsage } from "./hooks/useUsage";
 import UpgradePrompt from "./components/UpgradePrompt";
 import PricingModal from "./components/PricingModal";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import HowItWorks from "./pages/HowItWorks";
-import { Routes, Route, useLocation } from "react-router-dom";
 
 
 
