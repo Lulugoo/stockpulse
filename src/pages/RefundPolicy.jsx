@@ -10,12 +10,12 @@ export default function RefundPolicy({ dark }) {
       <div className="mx-auto max-w-2xl px-4 py-12">
         <div className={`rounded-2xl ${cardBg} p-8 shadow-sm`}>
           <h1 className={`text-2xl font-bold mb-1 ${headingColor}`}>Refund Policy</h1>
-          <p className={`text-xs mb-8 ${textSecondary}`}>Last updated: June 19, 2025</p>
+          <p className={`text-xs mb-8 ${textSecondary}`}>Last updated: June 19, 2026</p>
 
           {[
             {
               title: "14-Day Money-Back Guarantee",
-              body: "If you are not satisfied with StockPulse Pro for any reason, you may request a full refund within 14 days of your initial purchase. No questions asked. Email us at [your-email@domain.com] with the subject line 'Refund Request' and include your account email. Refunds are processed within 5–10 business days to the original payment method."
+              body: "If you are not satisfied with StockPulse Pro for any reason, you may request a full refund within 14 days of your initial purchase. No questions asked. Email us at support@sundayvalue.ca - app managing team with the subject line 'Refund Request' and include your account email. Refunds are processed within 5–10 business days to the original payment method."
             },
             {
               title: "After the 14-Day Period",
@@ -27,7 +27,7 @@ export default function RefundPolicy({ dark }) {
             },
             {
               title: "Exceptions",
-              body: "We may issue refunds outside the standard policy at our discretion in cases of billing errors, duplicate charges, or technical issues that prevented access to the service for an extended period. Contact us at [your-email@domain.com] if you believe you were charged in error."
+              body: "We may issue refunds outside the standard policy at our discretion in cases of billing errors, duplicate charges, or technical issues that prevented access to the service for an extended period. Contact us at support@sundayvalue.ca - app managing team if you believe you were charged in error."
             },
             {
               title: "Consumer Rights (Ontario)",

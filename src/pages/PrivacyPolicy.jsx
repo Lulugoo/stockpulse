@@ -16,7 +16,7 @@ export default function PrivacyPolicy({ dark }) {
           {[
             {
               title: "1. Who We Are",
-              body: "StockPulse is a stock analysis service operated by an individual based in Ontario, Canada. You can reach us at [your-email@domain.com]."
+              body: "StockPulse is a stock analysis service operated by an individual based in Ontario, Canada. You can reach us at support@sundayvalue.ca - app managing team."
             },
             {
               title: "2. Information We Collect",
@@ -36,7 +36,7 @@ export default function PrivacyPolicy({ dark }) {
             },
             {
               title: "6. Your Rights (PIPEDA & Ontario)",
-              body: "Under Canadian privacy law (PIPEDA), you have the right to access, correct, or request deletion of your personal information, and to withdraw consent to data processing. To exercise these rights, email us at [your-email@domain.com]."
+              body: "Under Canadian privacy law (PIPEDA), you have the right to access, correct, or request deletion of your personal information, and to withdraw consent to data processing. To exercise these rights, email us at support@sundayvalue.ca - app managing team."
             },
             {
               title: "7. Cookies",

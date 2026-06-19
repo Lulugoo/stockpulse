@@ -118,7 +118,14 @@ export default function PricingModal({ dark, onClose }) {
           </div>
         </div>
 
-        <p className={`mt-4 text-center text-xs ${textSecondary}`}>Cancel anytime. No hidden fees.</p>
+        <p className={`mt-4 text-center text-xs ${textSecondary}`}>
+            Cancel anytime. No hidden fees.{" "}
+            <a href="/terms" className="underline hover:opacity-80">Terms</a>
+            {" · "}
+            <a href="/refunds" className="underline hover:opacity-80">Refunds</a>
+            {" · "}
+            <a href="/privacy" className="underline hover:opacity-80">Privacy</a>
+        </p>
       </div>
     </div>
   );
