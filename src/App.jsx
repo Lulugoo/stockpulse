@@ -462,20 +462,20 @@ export default function App() {
   
 
 
-  useEffect(() => {
+ useEffect(() => {
   const intent = sessionStorage.getItem('pricingIntent');
   if (intent) {
     sessionStorage.removeItem('pricingIntent');
-    setTimeout(() => {
-      setPricingIntent(true);
-      if (user) {
+    supabase?.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
         setShowUpgradeModal(true);
       } else {
         setShowAuthModal(true);
       }
-    }, 500);
+    });
   }
 }, []);
+
 
 
 
