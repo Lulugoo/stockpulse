@@ -459,7 +459,7 @@ export default function App() {
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
   const [pricingIntent, setPricingIntent] = useState(false);
-  const location = useLocation();
+  
 
 
   useEffect(() => {
