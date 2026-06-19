@@ -458,7 +458,6 @@ export default function App() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
-  const location = useLocation();
   const [pricingIntent, setPricingIntent] = useState(false);
 
   useEffect(() => {
