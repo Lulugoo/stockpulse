@@ -1,4 +1,4 @@
-export default function UpgradePrompt({ dark, onSignIn, isGuest, remaining, limit }) {
+export default function UpgradePrompt({ dark, onSignIn, isGuest, remaining, limit, onUpgrade }) {
   return (
     <div
       className={`mt-6 rounded-2xl border p-6 text-center ${
@@ -43,7 +43,7 @@ export default function UpgradePrompt({ dark, onSignIn, isGuest, remaining, limi
           <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
             <button
               type="button"
-              onClick={() => alert("Stripe coming soon!")}
+              onClick={onUpgrade}
               className="w-full rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-600 sm:w-auto"
             >
               Upgrade to Pro — $6.99/mo
