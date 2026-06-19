@@ -646,10 +646,11 @@ export default function App() {
     setShowDropdownB(false);
   };
 
-  const handleSubmitB = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    loadTickerB(queryB);
+    await loadTicker(query);
   };
+
 
   const exitCompare = () => {
     setCompareMode(false);
