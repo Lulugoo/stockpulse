@@ -716,14 +716,33 @@ export default function App() {
               Stock<span className="text-emerald-500">Pulse</span>
             </span>
           </div>
-        {user ? (
+       {user ? (
+        <div className="flex items-center gap-2">
+          {isPro && (
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/create-portal-session", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: user.id }),
+                });
+                const { url, error } = await res.json();
+                if (url) window.location.href = url;
+                else alert("Could not open billing portal: " + error);
+              }}
+              className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${dark ? 'border-white/20 text-gray-300 hover:bg-white/10' : 'border-gray-300 text-gray-600 hover:bg-black/5'}`}
+            >
+              Manage plan
+            </button>
+          )}
           <button
             onClick={() => supabase.auth.signOut()}
-            className={`rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold ${dark ? 'bg-emerald-500 text-white' : 'bg-emerald-500 text-white'}`}
+            className="rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold bg-emerald-500 text-white"
             title="Sign out"
           >
             {user.email?.[0].toUpperCase()}
           </button>
+        </div>
         ) : (
           <button
             onClick={() => setShowAuthModal(true)}
