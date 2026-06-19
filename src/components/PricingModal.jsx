@@ -36,6 +36,7 @@ export default function PricingModal({ dark, onClose, user }) {
   const [yearly, setYearly] = useState(false);
     const handleUpgrade = async (plan) => {
         if (!user) return;
+        console.log("env check:", import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID, import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID);
 
         const priceId = plan === "yearly"
             ? import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID
