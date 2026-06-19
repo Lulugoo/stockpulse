@@ -458,11 +458,11 @@ export default function App() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { favorites, toggleFavorite } = useFavorites(user);
   const { trackLookup, remaining, isAtLimit, isPro } = useUsage(user);
-  const [pricingIntent, setPricingIntent] = useState(false);
+  //const [pricingIntent, setPricingIntent] = useState(false); - debbugging the pop up of how to -> view pricing page
   
 
 
- useEffect(() => {
+ {/*useEffect(() => {
   const intent = sessionStorage.getItem('pricingIntent');
   if (intent) {
     sessionStorage.removeItem('pricingIntent');
@@ -474,18 +474,18 @@ export default function App() {
       }
     });
   }
-}, []);
+}, []);*/}
 
 
 
 
-  useEffect(() => {
+ {/* useEffect(() => {
   if (user && pricingIntent) {
     setPricingIntent(false);
     setShowAuthModal(false);
     setShowUpgradeModal(true);
   }
-}, [user, pricingIntent]);
+}, [user, pricingIntent]);*/}
 
 
 
@@ -1170,7 +1170,7 @@ export default function App() {
       {showAuthModal && (
         <AuthModal
           dark={dark}
-          onClose={() => { setShowAuthModal(false); setPricingIntent(false); }}
+          onClose={() => setShowAuthModal(false)}
           onSuccess={() => {
             if (pricingIntent) {
               setPricingIntent(false);
