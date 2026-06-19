@@ -7,6 +7,10 @@ import { useFavorites } from "./hooks/useFavorites";
 import { useUsage } from "./hooks/useUsage";
 import UpgradePrompt from "./components/UpgradePrompt";
 import PricingModal from "./components/PricingModal";
+import { Routes, Route } from "react-router-dom";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RefundPolicy from "./pages/RefundPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 
 
@@ -684,7 +688,13 @@ export default function App() {
   const inputBg = dark ? "bg-[#444441] text-gray-100 placeholder-gray-400" : "bg-white text-gray-900 placeholder-gray-400";
 
   return (
+    <Routes>
+      <Route path="/privacy" element={<PrivacyPolicy dark={dark} />} />
+      <Route path="/terms" element={<TermsOfService dark={dark} />} />
+      <Route path="/refunds" element={<RefundPolicy dark={dark} />} />
+      <Route path="*" element={
     <div className={`min-h-screen w-full ${pageBg} transition-colors`}>
+
       <style>{`
         @keyframes spCardEnter {
           from { opacity: 0; transform: translateY(8px); }
@@ -1097,5 +1107,7 @@ export default function App() {
         <PricingModal dark={dark} onClose={() => setShowUpgradeModal(false)} />
       )}
     </div>
+      } />
+    </Routes>
   );
 }
