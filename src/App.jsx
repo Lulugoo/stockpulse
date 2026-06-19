@@ -3,6 +3,7 @@ import AuthModal from './components/AuthModal'
 import { useState, useEffect, useRef } from "react";
 import useStockData from "./hooks/useStockData";
 import scoreStock from "./utils/scoreStock";
+import { useFavorites } from "./hooks/useFavorites"; 
 
 
 const MAX_HISTORY = 5;
@@ -432,14 +433,6 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      const stored = localStorage.getItem("sp_favorites");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
   const [copied, setCopied] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [tickerB, setTickerB] = useState("");
@@ -451,8 +444,9 @@ export default function App() {
 
   const { data, loading, error } = useStockData(ticker);
   const { data: dataB, loading: loadingB, error: errorB } = useStockData(tickerB);
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null) // ← user defined here
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const { favorites, toggleFavorite } = useFavorites(user);
 
   // Authorization stat
   useEffect(() => {
@@ -474,11 +468,6 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Persist favorites to localStorage whenever they change.
-  useEffect(() => {
-    localStorage.setItem("sp_favorites", JSON.stringify(favorites));
-  }, [favorites]);
 
   // Debounced SYMBOL_SEARCH autocomplete (fires at 3+ chars).
   useEffect(() => {
@@ -635,15 +624,7 @@ export default function App() {
     setHistory((prev) => prev.filter((t) => t !== symbol));
   };
 
-  const toggleFavorite = (symbol) => {
-    setFavorites((prev) =>
-      prev.includes(symbol) ? prev.filter((t) => t !== symbol) : [...prev, symbol]
-    );
-  };
-
-  const removeFavorite = (symbol) => {
-    setFavorites((prev) => prev.filter((t) => t !== symbol));
-  };
+  const removeFavorite = (symbol) => toggleFavorite(symbol);
 
   const handleShare = (symbol) => {
     const url = `https://stockpulse-delta-eight.vercel.app/?ticker=${symbol}`;
